@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#FFFFFF">
+<title>CBNU ROOM 모바일 프로토타입</title>
+<link rel="icon" href="01. 심볼마크_CBNU Red_기본형.png">
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #FFFFFF; overflow: hidden; overscroll-behavior: none; }
+  /* 노치·홈 인디케이터 영역을 피해서 화면 안쪽에 맞춤 */
+  #wrap {
+    position: fixed;
+    top: env(safe-area-inset-top, 0px); bottom: env(safe-area-inset-bottom, 0px);
+    left: env(safe-area-inset-left, 0px); right: env(safe-area-inset-right, 0px);
+    overflow: hidden;
+  }
+  #app { position: absolute; left: 0; top: 0; width: 390px; height: 844px; border: 0; display: block; transform-origin: top left; background: #FFFFFF; }
+</style>
+</head>
+<body>
+<div id="wrap"><iframe id="app" src="app.html" title="CBNU ROOM 앱 프로토타입"></iframe></div>
+<script>
+  // 앱(기준 폭 390px)을 휴대폰 화면 폭에 맞춰 확대·축소하고,
+  // 세로 길이는 화면 높이에 맞게 늘이거나 줄여서 빈 곳이나 잘림이 없도록 맞춤
+  var wrap = document.getElementById('wrap');
+  var frame = document.getElementById('app');
+  var BASE_W = 390;
+
+  function appHeight() {
+    var s = wrap.clientWidth / BASE_W;
+    return { s: s, h: Math.round(wrap.clientHeight / s) };
+  }
+
+  function stretchInside(h) {
+    try {
+      var d = frame.contentDocument;
+      if (!d) return false;
+      var app = d.querySelector('.app');
+      if (!app) return false;
+      var st = d.getElementById('__mobile_fit');
+      if (!st) { st = d.createElement('style'); st.id = '__mobile_fit'; (d.head || d.documentElement).appendChild(st); }
+      st.textContent = 'html,body{margin:0;min-height:0!important;height:100%;overflow:hidden;background:#FFFFFF!important;display:block!important}.app{height:' + h + 'px!important}';
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function fit() {
+    var v = appHeight();
+    frame.style.transform = 'scale(' + v.s + ')';
+    frame.style.height = v.h + 'px';
+    stretchInside(v.h);
+  }
+
+  // 앱이 그려질 때까지 잠깐 확인하면서 맞춤
+  var tries = 0;
+  var timer = setInterval(function () {
+    fit();
+    if (stretchInside(appHeight().h) || ++tries > 100) { clearInterval(timer); setTimeout(fit, 300); }
+  }, 100);
+  window.addEventListener('resize', fit);
+  window.addEventListener('orientationchange', function () { setTimeout(fit, 300); });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', fit);
+  frame.addEventListener('load', function () { tries = 0; fit(); });
+  fit();
+</script>
+</body>
+</html>

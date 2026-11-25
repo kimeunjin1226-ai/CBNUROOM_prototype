@@ -96,6 +96,8 @@
   <p class="caption"><b>CBNU ROOM</b> · 충북대학교 기숙사 플랫폼 프로토타입</p>
 </div>
 <script>
+  // 휴대폰(폭 500px 이하)으로 열면 모바일 전용 화면으로 이동
+  if (window.innerWidth <= 500 && !/[?&]frame=1/.test(location.search)) location.replace('mobile.html');
   // 창 크기에 맞춰 폰 프레임을 축소(확대는 하지 않음)
   function fit() {
     var el = document.getElementById('fit');
